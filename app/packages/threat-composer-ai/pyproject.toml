@@ -1,0 +1,100 @@
+# Declared explicitly so the build does not fall back to setuptools' legacy
+# defaults, which ship only Python modules.
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "threat-composer-ai"
+version = "0.1.1"
+description = "AI-powered automated threat modeling for codebases"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "bandit",
+  "boto3",
+  "botocore[crt]",
+  "click",
+  "diagrams",
+  "fastmcp",
+  "jschema-to-python",
+  "json-schema-to-pydantic",
+  "jsonpickle",
+  "opentelemetry-api",
+  "opentelemetry-exporter-otlp-proto-http",
+  "opentelemetry-instrumentation-fastapi",
+  "opentelemetry-propagator-aws-xray",
+  "opentelemetry-sdk",
+  "pathspec",
+  "psutil",
+  "rich",
+  "sarif-om",
+  "strands-agents>=1.0,<2",
+  "strands-agents-tools>=0.2,<1"
+]
+
+  [project.scripts]
+  threat-composer-ai-cli = "threat_composer_ai.__main__:main"
+  threat-composer-ai-mcp = "threat_composer_ai.mcp_server:main"
+  threat-composer-ai-eval-quality = "threat_composer_ai.eval.quality:main"
+  threat-composer-ai-eval-consistency = "threat_composer_ai.eval.consistency.cli:eval_cli"
+
+  # Kept out of the runtime dependencies so that installing the CLI or the MCP
+  # server does not pull in an evaluation framework only CI uses. Install with
+  # `uv sync --extra eval`. All of its own core dependencies are already resolved
+  # here transitively, so this adds a single package.
+  [project.optional-dependencies]
+  eval = [
+    "strands-agents-evals"
+  ]
+  # Separate from eval because the embedding model pulls in PyTorch, which the
+  # quality eval in CI does not need. Install with `uv sync --extra consistency`.
+  consistency = [
+    "numpy",
+    "scipy",
+    "sentence-transformers"
+  ]
+
+[dependency-groups]
+dev = [
+  "pytest>=9.0.3",
+  "pytest-mock",
+  "pytest-cov",
+  "pytest-asyncio",
+  "ruff"
+]
+
+# Non-Python files the package reads at runtime, such as the DFD icons in
+# assets/. Without this they are left out of the wheel, and an install from it
+# draws diagrams without them. tests/test_packaging.py checks the built wheel.
+[tool.setuptools.package-data]
+threat_composer_ai = ["assets/**/*"]
+
+[tool.uv]
+managed = true
+package = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+exclude = [
+  ".git",
+  "__pycache__",
+  ".venv",
+  ".env",
+  ".eggs",
+  "*.egg",
+  "dist",
+  "build"
+]
+
+  [tool.ruff.lint]
+  select = [ "E", "W", "F", "I", "B", "C4", "UP" ]
+  ignore = [ "E501" ]
+
+  [tool.ruff.format]
+  quote-style = "double"
+  indent-style = "space"
+  skip-magic-trailing-comma = false
+  line-ending = "auto"
