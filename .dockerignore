@@ -1,0 +1,14 @@
+.git
+.gitignore
+Dockerfile
+.dockerignore
+**/node_modules
+README.md
+
+# Secrets and keys
+**/.env
+**/.env.*
+**/*.pem
+
+# OS / Editor 
+**/.DS_Store 
