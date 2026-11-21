@@ -14,9 +14,7 @@ RUN pnpm nx run @aws/threat-composer:copy-assets --excludeTaskDependencies
 
 RUN pnpm nx run @aws/threat-composer-app:compile:website --excludeTaskDependencies
 
-# CMD ["serve", "-s", "/app/packages/threat-composer-app/build/website", "-l", "3000"]
-
-FROM nginx/nginx-unprivileged:alpine3.24-perl
+FROM nginx/nginx-unprivileged:alpine3.24
 
 COPY --from=builder /app/packages/threat-composer-app/build/website /usr/share/nginx/html
 
